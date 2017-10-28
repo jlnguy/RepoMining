@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, BoundaryNorm
+from csv import read_file
 
 def getZScore (alist):
     # Returns an array
@@ -54,8 +55,10 @@ def getZScore (alist):
 # ----------------------------------
 
 # Takes in csv file for x-axis and y-axis from csvReader
-xaxisI = ['Time', '2', '4.5', '5', '6.5', '8', '12.5']   # timestamps
-yaxisI = ['Value', '0', '2', '2', '1', '3', '4']   # values
+#xaxisI = ['Time', '2', '4.5', '5', '6.5', '8', '12.5']   # timestamps
+#yaxisI = ['Value', '0', '2', '2', '1', '3', '4']   # values
+
+yaxisI, xaxisI = read_file()
 
 # xaxisI = input here
 # yaxisI = input here
