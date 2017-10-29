@@ -93,18 +93,11 @@ titlePrtTwo = titlePrtTwo + yAxisTitle
 meanY = np.mean(deltaY)
 stdDevY = np.std(deltaY)
 
-print ("meanY: ", meanY)
-print("stdDevY: ", stdDevY)
 topRangeZ = (meanY + (3.0 * stdDevY))
-print(topRangeZ)
 highRangeZ = (meanY + (2.5 * stdDevY))
 zeroRangeZ = (meanY + (0 * stdDevY))
 lowRangeZ = (meanY + (-2.5 * stdDevY))
 bottomRangeZ = (meanY + (-3.0 * stdDevY))
-print(highRangeZ)
-print(zeroRangeZ)
-print(lowRangeZ)
-print(bottomRangeZ)
 
 # -------
 # Convert lists into numpy-readable
