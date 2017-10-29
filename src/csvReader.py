@@ -2,7 +2,8 @@ import csv
 import numpy as np
 def read_file():    
     print("Enter input file:")
-    with open(input()) as csvfile:
+    filename = input()+'.csv'
+    with open(filename) as csvfile:
         readCSV = csv.reader(csvfile, delimiter = ',') #csv = comma separated
                 
         dates = []
