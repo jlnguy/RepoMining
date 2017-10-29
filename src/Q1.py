@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, BoundaryNorm
-from csv import read_file
+from csvReader import read_file
 
 def getZScore (alist):
     # Returns an array
