@@ -34,8 +34,17 @@ yaxisI, xaxisI = read_file()
 xTitle = xaxisI.pop(0)
 yTitle = yaxisI.pop(0)
 
-# Convert lists to ints
-xaxis = list(map(float, xaxisI))
+#Convert list of strings to datetime objects
+xaxis_datetime = []
+for x in xaxisI:
+    xaxis_datetime.append(datetime.strptime(x, '%m/%d/%Y'))
+    
+#Convert datetime objects to numbers for ploting
+xaxis = []
+for y in xaxis_datetime:
+    xaxis.append(dt.date2num(y))
+
+# Convert list to ints
 yaxis = list(map(float, yaxisI))
 
 
@@ -46,12 +55,11 @@ yaxis = list(map(float, yaxisI))
 # ----------------------------------
 
 
-titleString = "Q1: Time versus "
-titleString = titleString + yTitle
+titleString = "Q1: Time versus " + yTitle
 
 # Graph Plot
 fig1 = plt.figure()
-fig1 = plt.plot(xaxis, yaxis)
+fig1 = plt.plot_date(xaxis, yaxis, linestyle = 'solid', marker = 'None')
 plt.title(titleString) # Append variable
 plt.xlabel(xTitle)
 plt.ylabel(yTitle)
