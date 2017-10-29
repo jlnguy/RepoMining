@@ -24,23 +24,3 @@ def read_file():
                 info.append(data)
                             
         return (info, dates)
-
-
-        
-        
-        
-        
-
-   
-  
-
-
-            
-            
-    
-
-            
-  
-            
-        
-    
