@@ -42,6 +42,9 @@ yTitle = yaxisI.pop(0)
 xaxis_datetime = []
 for x in xaxisI:
     xaxis_datetime.append(datetime.strptime(x, '%m/%d/%Y'))
+    # Add an option to determine which x-data is getting put in; currently the only input that this accepts is month/day/time.
+    # Future additions: Be able to parse month-day-year; year-month-day; year/month/day; hour:minute:second
+    # (x, '%m-%d-%Y); (x, %Y-%m-%d); (x, %Y/%m/%d); (x, hourminutesecondhere)
     
 #Convert datetime objects to numbers for ploting
 xaxis = []
