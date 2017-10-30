@@ -4,6 +4,11 @@
 # Graphs Time versus Delta-Value
 # Graphs Time versus z-score of Value
 
+# To Do:
+# Dynamically allocate Fig 3 and Fig 4 y-axis range
+# Implement zoom-in function for certain ranges
+# Fix Fig 2 - 4 display options for x-axis.
+
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,10 +17,9 @@ import matplotlib.dates as dt
 from scipy import stats
 from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, BoundaryNorm
+from parseCSV import read_file
 from datetime import datetime
 from parseCSV import read_file
-
-
 
     # -infinity < f <= -3.0     = Red
     # -3.0 <= f <= -2.5         = Yellow
@@ -38,15 +42,14 @@ yaxisI, xaxisI = read_file()
 xTitle = xaxisI.pop(0)
 yTitle = yaxisI.pop(0)
 
-#Convert list of strings to datetime objects
 xaxis_datetime = []
 for x in xaxisI:
-    xaxis_datetime.append(datetime.strptime(x, '%m/%d/%Y'))
+    xaxis_datetime.append(datetime.strptime(x, '%Y-%m-%d'))
     # Add an option to determine which x-data is getting put in; currently the only input that this accepts is month/day/time.
     # Future additions: Be able to parse month-day-year; year-month-day; year/month/day; hour:minute:second
     # (x, '%m-%d-%Y); (x, %Y-%m-%d); (x, %Y/%m/%d); (x, hourminutesecondhere)
-    
-#Convert datetime objects to numbers for ploting
+
+# Convert datetime objects to numbers for ploting
 xaxis = []
 for y in xaxis_datetime:
     xaxis.append(dt.date2num(y))
@@ -62,11 +65,12 @@ yaxis = list(map(float, yaxisI))
 # ----------------------------------
 
 
-titleString = "Q1: Time versus " + yTitle
+titleString = "Q1: Time versus "
+titleString = titleString + yTitle
 
 # Graph Plot
 fig1 = plt.figure()
-fig1 = plt.plot_date(xaxis, yaxis, linestyle = 'solid', marker = 'None')
+fig1 = plt.plot(xaxis, yaxis)
 plt.title(titleString) # Append variable
 plt.xlabel(xTitle)
 plt.ylabel(yTitle)
@@ -91,11 +95,11 @@ while counter < len(yaxis):         # Find x_c = x_t - x_(t-1)
     changeIn = yaxis[counter] - yaxis[counter - 1]
     deltaY.append(changeIn)
     counter = counter + 1
-
 deltaX = []                         # Create a new array for xAxis
 for item in xaxis:
     deltaX.append(item)
-deltaX.pop()                    # Remove the first item
+deltaX.pop()
+                   # Remove the first item
 
 yAxisTitle = "Change in "       # Create the new y-axis title
 yAxisTitle = yAxisTitle + yTitle
@@ -133,11 +137,11 @@ lc.set_linewidth(1)
 fig2 = plt.figure()
 
 plt.title(titlePrtTwo)
-plt.axhline(y=topRangeZ, c='k', linestyle='--')
-plt.axhline(y=highRangeZ, c='k', linestyle='--')
-plt.axhline(y=zeroRangeZ, c='k', linestyle='--')
-plt.axhline(y=lowRangeZ, c='k', linestyle='--')
-plt.axhline(y=bottomRangeZ, c='k', linestyle='--')
+plt.axhline(y=topRangeZ, c='r', linestyle='--')
+plt.axhline(y=highRangeZ, c='y', linestyle='--')
+plt.axhline(y=zeroRangeZ, c='g', linestyle='--')
+plt.axhline(y=lowRangeZ, c='y', linestyle='--')
+plt.axhline(y=bottomRangeZ, c='r', linestyle='--')
 plt.xlabel(xTitle)
 plt.ylabel(yAxisTitle)
 plt.gca().add_collection(lc)
@@ -180,19 +184,95 @@ lc2.set_linewidth(1)
 
 plt.gca().add_collection(lc2)
 plt.xlim(xzaxis.min()-1, xzaxis.max()+1)
+
+yLowLim = 0.0
+yMaxLim = 0.0
+#if (yzaxis.min() < -3.0):
+#    yLowLim = yzaxis.min() + (yzaxis.min() * 1.1)
+#elif (-3.0 < yzaxis.min()):
+#    yLowLim = -4.5
+
+#if (yzaxis.max() < 3.0):
+#    yMaxLim = 4.5
+#elif(3.0 < yzaxis.max()):
+#    yMaxLim = yzaxis.max() + (yzaxis.max() * 1.1)
+#plt.ylim(yLowLim, yMaxLim)
 plt.ylim(-10.0, 10.0)
 
 # ------ Plot Graph ------
 
 plt.title(begTitle)
-plt.axhline(y=3.0, c='k', linestyle='--')
-plt.axhline(y=2.5, c='k', linestyle='--')
-plt.axhline(y=0, c='k', linestyle='--')
-plt.axhline(y=-2.5, c='k', linestyle='--')
-plt.axhline(y=-3.0, c='k', linestyle='--')
+plt.axhline(y=3.0, c='r', linestyle='--')
+plt.axhline(y=2.5, c='y', linestyle='--')
+plt.axhline(y=0, c='g', linestyle='--')
+plt.axhline(y=-2.5, c='y', linestyle='--')
+plt.axhline(y=-3.0, c='r', linestyle='--')
 plt.xlabel(xTitle)
 plt.ylabel(midTitle)
 
 #fig3_size = plt.rcParams["figure.figsize"] = [8,8]
+
+
+# ------------- Part 4 -------------
+# |                                |
+# |   Graph delta-x values versus  |
+# |            z-score             |
+# |        Color-Code Range        |
+# |                                |
+# ----------------------------------
+#graph x values z-score
+dyzaxis = []
+dyzaxis = stats.zscore(deltaY)
+
+begTitle = "Q1: Time versus "
+midTitle = "z-score of "
+midTitle = midTitle + yAxisTitle
+begTitle = begTitle + midTitle
+
+# ------ Set Line Colors ------
+fig4 = plt.figure()
+
+dxzaxis = np.array(deltaX)
+dyzaxis = np.array(dyzaxis)
+
+cmap3 = ListedColormap(['r', 'y', 'g', 'y', 'r'])
+norm3 = BoundaryNorm([negInf, -3.0, -2.5, 2.5, 3.0, posInf], cmap3.N)
+
+points3 = np.array([dxzaxis, dyzaxis]).T.reshape(-1,1,2)
+segments3 = np.concatenate([points3[:-1], points3[1:]], axis=1)
+
+lc3 = LineCollection(segments3, cmap=cmap3, norm=norm3)
+lc3.set_array(dyzaxis)
+lc3.set_linewidth(1)
+
+plt.gca().add_collection(lc3)
+plt.xlim(dxzaxis.min()-1, dxzaxis.max()+1)
+
+yLowLim2 = 0.0
+yMaxLim2 = 0.0
+#if (yzaxis.min() < -3.0):
+#    yLowLim2 = yzaxis.min() + (yzaxis.min() * 1.1)
+#elif (-3.0 < yzaxis.min()):
+#    yLowLim2 = -4.5
+
+#if (yzaxis.max() < 3.0):
+#    yMaxLim2 = 4.5
+#elif(3.0 < yzaxis.max()):
+#    yMaxLim2 = yzaxis.max() + (yzaxis.max() * 1.1)
+#plt.ylim(yLowLim2, yMaxLim2)
+plt.ylim(-10.0, 10.0)
+
+# ------ Plot Graph ------
+
+plt.title(begTitle)
+plt.axhline(y=3.0, c='r', linestyle='--')
+plt.axhline(y=2.5, c='y', linestyle='--')
+plt.axhline(y=0, c='g', linestyle='--')
+plt.axhline(y=-2.5, c='y', linestyle='--')
+plt.axhline(y=-3.0, c='r', linestyle='--')
+plt.xlabel(xTitle)
+plt.ylabel(yAxisTitle)
+
+#-------
 
 plt.show()
