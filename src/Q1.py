@@ -226,10 +226,39 @@ midTitle_4 = "z-score of the "
 titleFig4 = "Q1 Figure 4: Time versus the "
 titleFig4 = titleFig4 + midTitle_4 + midTitle_3
 
+# ----- Create 4 additonal lists, for yellow and red ranges -----
+testList = []
+yellowCx = np.array(testList)
+yellowCy = np.array(testList)
+redCx = np.array(testList)
+redCy = np.array(testList)
+length = len(deltaY_zscore)
+i = 0
+while (i < length):
+    if(deltaY_zscore[i] >= 2.5):
+        if(deltaY_zscore[i] < 3.0):
+            yellowCy = np.append(yellowCy, deltaY_zscore[i])
+            yellowCx = np.append(yellowCx, deltaX_zscore[i])
+        else:
+            redCy = np.append(redCy, deltaY_zscore[i])
+            redCx = np.append(redCx, deltaX_zscore[i])
+
+    elif (deltaY_zscore[i] <= -2.5):
+        if(deltaY_zscore[i] > -3.0):
+            yellowCy = np.append(yellowCy, deltaY_zscore[i])
+            yellowCx = np.append(yellowCx, deltaX_zscore[i])
+        else:
+            redCy = np.append(redCy, deltaY_zscore[i])
+            redCx = np.append(redCx, deltaX_zscore[i])
+
+    i = i+1
+
 # ------ Plot Graph Labels -----
 
 fig4 = plt.figure()
-fig4 = plt.bar(deltaX_zscore, deltaY_zscore, 1.0, color='b')
+fig4 = plt.bar(deltaX_zscore, deltaY_zscore, 1.0, color='g')
+fig4 = plt.bar(yellowCx, yellowCy, 1.0, color='y')
+fig4 = plt.bar(redCx, redCy, 1.0, color='r')
 
 
 plt.title(titleFig4)
