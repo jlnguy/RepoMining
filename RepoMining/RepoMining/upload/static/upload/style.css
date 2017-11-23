@@ -1,0 +1,12 @@
+body{
+    background: url("https://i.imgur.com/GjscCgG.jpg");
+    background-size: cover;
+}
+
+.navbar{
+    border-radius: 0;
+}
+
+.navbar{
+    font-family: 'Ubuntu', cursive;
+}
