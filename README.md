@@ -25,10 +25,10 @@
 
 |  |  |
 | :---: | :---: |
-| Plan (Jan 18) | [Plan](), [Presentation]() |
-| Milestone 4 (Feb 13) | [Presentation](), [Progress Evaluation]() |
-| Milestone 5 (Mar 20) | [Poster](), [Presentation](), [Progress Evaluation]() |
-| Milestone 6 (Apr 17) | [User Manual](), [Demo Video](), [Presentation](), [Progress Evaluation]() |
+| Plan (Jan 17) | [Plan](), [Presentation]() |
+| Milestone 4 (Feb 12) | [Presentation](), [Progress Evaluation]() |
+| Milestone 5 (Mar 19) | [Poster](), [Presentation](), [Progress Evaluation]() |
+| Milestone 6 (Apr 16) | [User Manual](), [Demo Video](), [Presentation](), [Progress Evaluation]() |
 |  |  |
 
  
