@@ -26,7 +26,7 @@
 |  |  |
 | :---: | :---: |
 | Plan (Jan 17) | [Plan](https://jlnguy.github.io/RepoMining/seniorDesignDocs/Sem2%20Proj%20Plan.pdf), [Presentation](https://jlnguy.github.io/RepoMining/seniorDesignDocs/Sem2%20Proj%20Plan%20Presentation.pdf) |
-| Milestone 4 (Feb 12) | [Presentation](), [Progress Evaluation]() |
+| Milestone 4 (Feb 12) | [Presentation](https://jlnguy.github.io/RepoMining/seniorDesignDocs/Milestone%204%20Presentation.pdf), [Progress Evaluation](https://jlnguy.github.io/RepoMining/seniorDesignDocs/Milestone%204.pdf) |
 | Milestone 5 (Mar 19) | [Poster](), [Presentation](), [Progress Evaluation]() |
 | Milestone 6 (Apr 16) | [User Manual](), [Demo Video](), [Presentation](), [Progress Evaluation]() |
 |  |  |
