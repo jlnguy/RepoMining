@@ -6,12 +6,14 @@
 # Currently NarrowData.py to do:
 #       Pulls the file from Upload.py, since the Data Consumer goes through Upload.py first.
 #       1.) If data occurs before target timestamp, add to list
-#               a.) Must be at least 5 timestamps behind.
+#               a.) Must be at least lag# timestamps behind.
 #       2.) If data matches tags targeted, add to list
 
 # Update: 1/11/18
 
-def getID(target, tags):
+from datetime import datetime, timedelta
+
+def getID(target, tags, lag):
     import sqlite3
     conn = sqlite3.connect('test.db')
     c = conn.cursor()
@@ -19,6 +21,9 @@ def getID(target, tags):
     number = getTargetID(target)
     beg = getTargetFirst(number)
     end = getTargetLast(number)
+    
+    beg = datetime.strptime(beg, '%Y-%m-%d %H:%M:%S')
+    beg = beg - timedelta(days=lag)
 
     # Query: Select all IDnumbers that occur before targetFirstStamp and after targetLastStamp.
     c.execute('''SELECT IDnum FROM granularity ''' 
