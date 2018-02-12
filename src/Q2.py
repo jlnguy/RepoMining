@@ -46,19 +46,19 @@ targetXconv = convertData(targetX)
 targetID = getTargetID(targetFile)
 targetStart = getTargetFirst(targetID)
 
+# Arbitrarily set lag as 5
+lag = 5
+
 #print('fileID:', targetFile, "ID number: ", targetID)
 #print('start: ', targetStart)
 
-listOfNarrowDataIDs = getID(targetFile, tags)
+listOfNarrowDataIDs = getID(targetFile, tags, lag)
 if(len(listOfNarrowDataIDs) == 0):
     print('No values found with NarrowData (granularity)')
 
 # Lists to store arbitrary information about csvs
 # list = [filename, xaxis, yaxis]
 axisData = [[targetFile, titleX, titleY]]
-
-# Arbitrarily set lag as 5
-lag = 5
 
 # [target, id#, lag, correlation]
 # Pad the multidimensional matrix with 0's
