@@ -1,27 +1,25 @@
 # NarrowData.py
 # --------
 # Using Target Variable from Input.py and Search Tags,
-# Go through Database and retrieve 10 or less csv files
+# Go through Database and retrieve all csv files that match criteria
 
 # Currently NarrowData.py to do:
 #       Pulls the file from Upload.py, since the Data Consumer goes through Upload.py first.
 #       1.) If data occurs before target timestamp, add to list
-#               a.) Must be at least lag# timestamps behind.
+#               a.) Must be at least 5 timestamps behind.
 #       2.) If data matches tags targeted, add to list
 
-# Update: 1/11/18
 
 from datetime import datetime, timedelta
 
 def getID(target, tags, lag):
     import sqlite3
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect('data.db')
     c = conn.cursor()
 
     number = getTargetID(target)
     beg = getTargetFirst(number)
     end = getTargetLast(number)
-    
     beg = datetime.strptime(beg, '%Y-%m-%d %H:%M:%S')
     beg = beg - timedelta(days=lag)
 
@@ -56,13 +54,13 @@ def getID(target, tags, lag):
         # else remove
     #c.execute('''''')
 
-    #conn.commit()
+    conn.commit()
     conn.close()
     return nameList
 
 def getTargetID(fileName):
     import sqlite3
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect('data.db')
     c = conn.cursor()
 
     c.execute('''SELECT IDnum FROM description '''
@@ -76,7 +74,7 @@ def getTargetID(fileName):
 
 def getTargetFirst(ID):
     import sqlite3
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect('data.db')
     c = conn.cursor()
 
     c.execute('''SELECT first from granularity WHERE IDnum = ?''', (ID,))
@@ -89,7 +87,7 @@ def getTargetFirst(ID):
 
 def getTargetLast(ID):
     import sqlite3
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect('data.db')
     c = conn.cursor()
 
     c.execute('''SELECT last from granularity WHERE IDnum = ?''', (ID,))
@@ -100,6 +98,19 @@ def getTargetLast(ID):
     conn.close()
     return fileLast
 
+def getGranularityType(ID):
+    import sqlite3
+    conn = sqlite3.connect('data.db')
+    c = conn.cursor()
+
+    c.execute('''SELECT name FROM description '''
+              ''' WHERE IDnum = ?''', (ID,))
+
+    rows = c.fetchall()
+    granu = rows[0][0]
+
+    conn.close()
+    return granu
 
 #Prompt to upload file, or pick target variable
 
