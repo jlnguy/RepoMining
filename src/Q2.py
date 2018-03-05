@@ -5,11 +5,13 @@
 # Figure 2: Displays correlation of top-k variables against target variable correlation
 # Figure 3: Displays top-1 correlation values for each lag time
 
-from NarrowData import getID, getTargetID, getTargetFirst
+from NarrowData import getID, getTargetID, getTargetFirst, getGranularityType
 from ParseData import shuffleDate, shuffleY, trimData
 from ParseComma import getData, convertData
+from Q3 import calculateTarget
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 
 def correlation(xlist, ylist):
@@ -38,24 +40,43 @@ def correlation(xlist, ylist):
     return corr
 
 
+# ------------- Part i -------------
+# |                                |
+# |        Perform NarrowData      |
+# |      Calculate correlation     |
+# |                                |
+# ----------------------------------
+
 # set file as another one later.
-targetFile = 't4.csv'
+targetFile = 'Q2_WILL.csv'
+# Works with t7 and t4. Date: 1/11/18
+# Works with Q2_DJIA.csv, Q2_NASDAQ.csv. Date: 2/25/18
 tags = [0]
 targetX, targetY, titleX, titleY = getData(targetFile)
 targetXconv = convertData(targetX)
 targetID = getTargetID(targetFile)
+granularity = getGranularityType(targetID)
 targetStart = getTargetFirst(targetID)
+
 
 # Arbitrarily set lag as 5
 lag = 5
 
+# Arbitrarily set top-k number to 3;
+top_k = 3   # Pretend this is user specifying they want top-k of 3
+top_k = top_k - 1   # fix up top_k variable to be index 0 instead of 1; done.
+
 #print('fileID:', targetFile, "ID number: ", targetID)
 #print('start: ', targetStart)
 
+#listOfNarrowDataIDs = getID(targetFile, granularity, tags, lag)
 listOfNarrowDataIDs = getID(targetFile, tags, lag)
+
+print(listOfNarrowDataIDs)
 if(len(listOfNarrowDataIDs) == 0):
     print('No values found with NarrowData (granularity)')
-
+if(len(listOfNarrowDataIDs) < top_k):
+    print('Not enough values found with NarrowData (granularity)')
 # Lists to store arbitrary information about csvs
 # list = [filename, xaxis, yaxis]
 axisData = [[targetFile, titleX, titleY]]
@@ -74,7 +95,7 @@ for item in listOfNarrowDataIDs:
         shuffledX = shuffleDate(itemX, targetStart, ctr)
         shuffledX = convertData(shuffledX)
         corr = correlation(shuffledX, targetXconv)
-
+        #print(item)
         corrMatrix = np.append(corrMatrix, [[item, numberID, ctr, corr]], 0)
         ctr = ctr-1
     ctr = lag
@@ -85,15 +106,17 @@ corrMatrix = np.delete(corrMatrix, 0, 0) # Remove the padded row [0,0,0,0]
 
 corrSort = sorted(corrMatrix, key=lambda x: x[3], reverse=True)
 
+# ------------- Part ii ------------
+# |                                |
+# |        Find top-k values       |
+# |                                |
+# ----------------------------------
 
-# Arbitrarily set top-k number to 3;
-top_k = 3   # Pretend this is user specifying they want top-k of 3
-top_k = top_k - 1   # fix up top_k variable to be index 0 instead of 1; done.
 ctr = 0
 inc = 0
 # topCorrValues = length of top_k, [target, id#, lag, correlation]
 topCorrValues = [[corrSort[0][0], corrSort[0][1], corrSort[0][2], corrSort[0][3]]]
-print('')
+#print('')
 
 while(inc < top_k):
     if (inc >= 1):
@@ -119,7 +142,7 @@ while(inc < top_k):
 tempString = str(axisData[0][2])
 xaxisString = [tempString]
 ctr = 1
-while(ctr < len(axisData)):
+while(ctr < len(axisData)-1):
     tempString = str(axisData[ctr][2][:6])
     tempString = tempString + ", lag="
     temp = str(topCorrValues[ctr-1][2])
@@ -127,14 +150,22 @@ while(ctr < len(axisData)):
     xaxisString = np.append(xaxisString, tempString)
     ctr = ctr+1
 
-# --------------------
-# Graph values(?)
+
+# ------------- Part 1 -------------
+# |                                |
+# |   Visualize top-k values with  |
+# |   Target Variable (Line Graph) |
+# |                                |
+# ----------------------------------
+
 color = ['k', 'g', 'y', 'r', 'b', 'p'] # Up to top-k of 5
 fig1 = plt.figure()
 
 # graph the target)
 plt.plot(targetX, targetY, 'k', c='k', lw=1, label=xaxisString[0])
-fig2Matrix = [[targetY]]
+q3Matrix = [targetY]
+# add items to matrix via columns or rows.. iunno
+# q3Matrix[0] has first values of target. Dates will be passed via function call.
 
 ctr = 1
 while(ctr < len(xaxisString)):
@@ -149,7 +180,12 @@ while(ctr < len(xaxisString)):
     # trim shuVarY into the same size as targetY
     itemY = trimData(targetY, varShuY)
 
-    fig2Matrix = np.append(fig2Matrix, [[itemY]], 0)
+    q3Matrix.append(itemY)
+
+    '''df2 = pd.DataFrame({var_TitleY:itemY})
+    frames = [df, df2]
+    df = pd.concat(frames)
+    '''
     plt.plot(targetX, itemY, 'k--', c=color[ctr], lw=1, label=xaxisString[ctr])
     ctr = ctr+1
 
@@ -161,9 +197,13 @@ plt.title("Figure 1")
 plt.xlabel(titleX)
 plt.ylabel(titleY)
 
+# ------------- Part 2 -------------
+# |                                |
+# |    In-Depth graph of Pearson   |
+# |     Correlation (Bar Graph)    |
+# |                                |
+# ----------------------------------
 
-# --------------
-# part 2: pearson correlation/bar graph
 fig2 = plt.figure()
 barXTitle = "Correlation Value (abs)"
 targetFig2 = "Target Variable = " + str(axisData[0][0])
@@ -192,7 +232,13 @@ while(ctr < len(xaxisString)):
 plt.xlabel(barXTitle)
 plt.xlim(0, 1.0)
 
-# Figure 3: corr value zoom in thing
+
+# ------------- Part 3 -------------
+# |                                |
+# |  Calculate Cross Correlation   |
+# |     Bar Graph of Lag-times     |
+# |                                |
+# ----------------------------------
 
 fig3 = plt.figure()
 # Retrieve top-1 value
@@ -225,3 +271,32 @@ while (ctr >= 0):
     ctr = ctr - 1
 
 plt.show()
+
+# ----- Call Q3 using q3Matrix -----
+
+'''
+lenM = len(q3Matrix[0])
+temp = np.array(q3Matrix[1]).reshape(lenM,1)
+stack = np.hstack(temp)
+ctr=2
+while(ctr < len(q3Matrix)):
+    temp = np.array(q3Matrix[ctr]).reshape(lenM, 1)
+    #print(temp)
+    stack = np.column_stack((stack, q3Matrix[ctr]))
+    ctr=ctr+1
+'''
+lenM = len(q3Matrix[0])
+temp = np.array(q3Matrix[1]).reshape(lenM,1)
+stack = np.hstack(temp)
+ctr=2
+while(ctr<len(q3Matrix)):
+    temp = np.array(q3Matrix[ctr]).reshape(lenM,1)
+    stack = np.column_stack((stack, q3Matrix[ctr]))
+    ctr=ctr+1
+#print('')
+#print(stack)
+
+df = pd.DataFrame(stack)
+
+#calculateTarget(q3Matrix, targetX, titleX, titleY)
+calculateTarget(df, targetY, targetX, titleX, titleY, top_k)
