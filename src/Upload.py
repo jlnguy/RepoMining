@@ -5,7 +5,7 @@
 from datetime import datetime
 from parseCSV import inputFile
 import sqlite3
-conn = sqlite3.connect('test.db')
+conn = sqlite3.connect('data.db')
 c = conn.cursor()
 
 def getFirstStamp():
@@ -72,13 +72,25 @@ c.execute('''INSERT INTO description(name, target, info, IDnum)
 # Timestamps
 # Timestamps are not parsed (Still has DATE x x x x format)
 y, x = inputFile(filename)
-first = x[1]
-last = x[(len(x) - 1)]
+fi = x[1]
+la = x[(len(x) - 1)]
 
-firstStamp = datetime.strptime(first, '%Y-%m-%d')
-lastStamp = datetime.strptime(last, '%Y-%m-%d')
+if (typeGranularity == 'Daily'):
+    firstStamp = datetime.strptime(fi, '%Y-%m-%d')
+    lastStamp = datetime.strptime(la, '%Y-%m-%d')
+elif(typeGranularity == 'Monthly'):
+    firstStamp = datetime.strptime(fi, '%Y-%m')
+    lastStamp = datetime.strptime(la, '%Y-%m')
+elif(typeGranularity == 'Yearly'):
+    firstStamp = datetime.strptime(fi, '%Y')
+    lastStamp = datetime.strptime(la, '%Y')
+else:
+    print("Incorrect format. Granuarity must be in 'Daily/Monthly/Yearly' format.")
+    firstStamp = 0
+    laststamp = 0
+
 c.execute('''INSERT INTO granularity(first, last, type, itemNum, IDnum)'''
-              '''VALUES(?,?,?,?,?)''', (firstStamp, lastStamp, typeGranularity, len(x), identity))
+             '''VALUES(?,?,?,?,?)''', (firstStamp, lastStamp, typeGranularity, len(x), identity))
 
 c.execute('''INSERT INTO privacy(user, setting, IDnum)'''
               '''VALUES(?,?,?)''', (username, settype, identity))
