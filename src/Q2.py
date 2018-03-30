@@ -5,6 +5,8 @@
 # Figure 2: Displays correlation of top-k variables against target variable correlation
 # Figure 3: Displays top-1 correlation values for each lag time
 
+# To do: Color code negative correlation(?) Milestone 6
+
 from NarrowData import getID, getTargetID, getTargetFirst, getGranularityType
 from ParseData import shuffleDate, shuffleY, trimData
 from ParseComma import getData, convertData
@@ -48,19 +50,30 @@ def correlation(xlist, ylist):
 # ----------------------------------
 
 # set file as another one later.
-targetFile = 'Q2_WILL.csv'
+targetFile = 't15.csv'
+# Run with t18, t7, t4, or t15
+
 # Works with t7 and t4. Date: 1/11/18
 # Works with Q2_DJIA.csv, Q2_NASDAQ.csv. Date: 2/25/18
 tags = [0]
 targetX, targetY, titleX, titleY = getData(targetFile)
-targetXconv = convertData(targetX)
+targetXconv = convertXData(targetX)
 targetID = getTargetID(targetFile)
 granularity = getGranularityType(targetID)
 targetStart = getTargetFirst(targetID)
+yStart = targetY[0]
 
+'''
+print('targetX: ', targetX)
+print('targetY: ', targetY)
+print('')
+
+print('granularity: ', granularity)
+'''
 
 # Arbitrarily set lag as 5
-lag = 5
+#lag = 5
+lag = 3
 
 # Arbitrarily set top-k number to 3;
 top_k = 3   # Pretend this is user specifying they want top-k of 3
@@ -70,9 +83,12 @@ top_k = top_k - 1   # fix up top_k variable to be index 0 instead of 1; done.
 #print('start: ', targetStart)
 
 #listOfNarrowDataIDs = getID(targetFile, granularity, tags, lag)
-listOfNarrowDataIDs = getID(targetFile, tags, lag)
+listOfNarrowDataIDs = getID(targetFile, tags, lag, granularity)
 
-print(listOfNarrowDataIDs)
+print('List of Files: ', listOfNarrowDataIDs)
+print('Number of files to be analyzed: ', len(listOfNarrowDataIDs))
+print('')
+
 if(len(listOfNarrowDataIDs) == 0):
     print('No values found with NarrowData (granularity)')
 if(len(listOfNarrowDataIDs) < top_k):
@@ -83,24 +99,53 @@ axisData = [[targetFile, titleX, titleY]]
 
 # [target, id#, lag, correlation]
 # Pad the multidimensional matrix with 0's
-corrMatrix = [[0,0,0,0]]
+corrMatrix = [[0,0,0,0,0]]
 
 ctr = lag
 for item in listOfNarrowDataIDs:
+    '''print('---------------')'''
     numberID = getTargetID(item)
     itemX, itemY, item_TitleX, item_TitleY = getData(item)
     trun = item_TitleY[:6]
     axisData = np.append(axisData, [[item, item_TitleX, item_TitleY]], 0)
+    '''
+    print('')
+    print('itemX: ', itemX)
+    print('itemY: ', itemY)
+    print('initial length: ', len(itemX), len(itemY))
+    print('')
+
+    print('item: ', item)'''
     while(ctr >= 0):
-        shuffledX = shuffleDate(itemX, targetStart, ctr)
-        shuffledX = convertData(shuffledX)
-        corr = correlation(shuffledX, targetXconv)
-        #print(item)
-        corrMatrix = np.append(corrMatrix, [[item, numberID, ctr, corr]], 0)
+        tempY = itemY
+        tempX = itemX
+        shuffledX, shuffledY = shuffleDate(tempY, tempX, targetStart, ctr)
+        shuffledX = convertXData(shuffledX)
+        '''print('shuffledX: ', shuffledX)
+        print('shuffledY: ', shuffledY)
+        print('Lag: ', ctr)
+
+        print('lengthX: ', len(shuffledX),'lengthY: ', len(shuffledY))
+        '''
+        corr = correlation(shuffledY, targetY)
+
+        # True if positive, False if negative
+        if (corr > 0):
+            color = True
+        elif (corr < 0):
+            color = False
+
+        # Absolute Value
+        corr = abs(corr)
+        '''print('correlation: ', corr)'''
+
+        corrMatrix = np.append(corrMatrix, [[item, numberID, ctr, corr, color]], 0)
         ctr = ctr-1
     ctr = lag
 
 corrMatrix = np.delete(corrMatrix, 0, 0) # Remove the padded row [0,0,0,0]
+
+#print(corrMatrix)
 
 # find the top-k variables
 
@@ -115,8 +160,9 @@ corrSort = sorted(corrMatrix, key=lambda x: x[3], reverse=True)
 ctr = 0
 inc = 0
 # topCorrValues = length of top_k, [target, id#, lag, correlation]
+# Assume top_k is 3.
 topCorrValues = [[corrSort[0][0], corrSort[0][1], corrSort[0][2], corrSort[0][3]]]
-#print('')
+#topCorrValue[0] is target variable
 
 while(inc < top_k):
     if (inc >= 1):
@@ -138,11 +184,14 @@ while(inc < top_k):
 # graph top-k variables
 # Retrieve data for top-k variables
 
+'''print('topCorrValues: ', topCorrValues)
+print('')
+print('xaxisData: ', axisData)'''
 # create array to hold strings and axis titles
 tempString = str(axisData[0][2])
 xaxisString = [tempString]
 ctr = 1
-while(ctr < len(axisData)-1):
+while(ctr <= top_k + 1):
     tempString = str(axisData[ctr][2][:6])
     tempString = tempString + ", lag="
     temp = str(topCorrValues[ctr-1][2])
@@ -150,6 +199,7 @@ while(ctr < len(axisData)-1):
     xaxisString = np.append(xaxisString, tempString)
     ctr = ctr+1
 
+'''print('xaxisString: ', xaxisString)'''
 
 # ------------- Part 1 -------------
 # |                                |
@@ -218,6 +268,10 @@ while(ctr < len(topCorrValues)):
     yBarValues = np.append(yBarValues, temp)
     ctr = ctr+1
 
+#yBarValues = yBarValues.astype(float)
+#print('yBarValues: ', yBarValues)
+
+
 fig2 = plt.barh(yBarTemp, yBarValues)
 # Font size needs help on yticks.
 plt.title("Fig.2: Correlation value of Top-K variables")
@@ -255,6 +309,7 @@ while(ctr < len(corrMatrix)):
         lagNum = np.append(lagNum, int(corrMatrix[ctr][2]))
     ctr = ctr+1
 
+#print('lagNum', lagNum)
 
 xpart3 = "Fig.3: Comparison of the Correlation Values of " + str(axisData[1][2])
 plt.title(xpart3)
@@ -264,7 +319,7 @@ plt.ylim(0, 1.0)
 
 fig3 = plt.bar(lagNum, corrNum, align='center')
 ctr = lag
-local = -0.3
+local = -0.2
 while (ctr >= 0):
     plt.text(local, 0.1, str(corrNum[ctr][:6]))
     local = local + 1
@@ -299,4 +354,4 @@ while(ctr<len(q3Matrix)):
 df = pd.DataFrame(stack)
 
 #calculateTarget(q3Matrix, targetX, titleX, titleY)
-calculateTarget(df, targetY, targetX, titleX, titleY, top_k)
+calculateTarget(df, targetY, targetX, titleX, titleY, granularity)
