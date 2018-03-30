@@ -1,7 +1,7 @@
 # NarrowData.py
 # --------
 # Using Target Variable from Input.py and Search Tags,
-# Go through Database and retrieve all csv files that match criteria
+# Go through Database and retrieve 10 or less csv files
 
 # Currently NarrowData.py to do:
 #       Pulls the file from Upload.py, since the Data Consumer goes through Upload.py first.
@@ -9,24 +9,38 @@
 #               a.) Must be at least 5 timestamps behind.
 #       2.) If data matches tags targeted, add to list
 
+# Update: 1/11/18
 
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta as rdel
 
-def getID(target, tags, lag):
+def getID(target, tags, lag, granu):
     import sqlite3
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect('test1.db')
     c = conn.cursor()
 
     number = getTargetID(target)
     beg = getTargetFirst(number)
     end = getTargetLast(number)
-    beg = datetime.strptime(beg, '%Y-%m-%d %H:%M:%S')
-    beg = beg - timedelta(days=lag)
+    print('Before cut: ', beg)
+    print('Lag: ', lag)
+    ctr = lag + 1
+    if(granu == 'Daily'):
+        beg = datetime.strptime(beg, '%Y-%m-%d %H:%M:%S')
+        beg = beg - timedelta(days=ctr)
+    elif(granu == 'Monthly'):
+        beg = datetime.strptime(beg, '%Y-%m-%d %H:%M:%S')
+        beg = beg - rdel(months=ctr)
+    elif(granu == 'Yearly'):
+        beg = datetime.strptime(beg, '%Y-%m-%d %H:%M:%S')
+        beg = beg - rdel(years=ctr)
+
+    print('After cut: ', beg)
 
     # Query: Select all IDnumbers that occur before targetFirstStamp and after targetLastStamp.
     c.execute('''SELECT IDnum FROM granularity ''' 
-            ''' WHERE first < ? AND last >= ?''',
-              (beg, end))
+            ''' WHERE first < ? AND last >= ? AND type == ?''',
+              (beg, end, granu))
 
     rows = c.fetchall()
 
@@ -60,7 +74,7 @@ def getID(target, tags, lag):
 
 def getTargetID(fileName):
     import sqlite3
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect('test1.db')
     c = conn.cursor()
 
     c.execute('''SELECT IDnum FROM description '''
@@ -74,7 +88,7 @@ def getTargetID(fileName):
 
 def getTargetFirst(ID):
     import sqlite3
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect('test1.db')
     c = conn.cursor()
 
     c.execute('''SELECT first from granularity WHERE IDnum = ?''', (ID,))
@@ -87,7 +101,7 @@ def getTargetFirst(ID):
 
 def getTargetLast(ID):
     import sqlite3
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect('test1.db')
     c = conn.cursor()
 
     c.execute('''SELECT last from granularity WHERE IDnum = ?''', (ID,))
@@ -100,10 +114,10 @@ def getTargetLast(ID):
 
 def getGranularityType(ID):
     import sqlite3
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect('test1.db')
     c = conn.cursor()
 
-    c.execute('''SELECT name FROM description '''
+    c.execute('''SELECT type FROM granularity '''
               ''' WHERE IDnum = ?''', (ID,))
 
     rows = c.fetchall()
