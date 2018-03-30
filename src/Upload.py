@@ -5,7 +5,7 @@
 from datetime import datetime
 from parseCSV import inputFile
 import sqlite3
-conn = sqlite3.connect('data.db')
+conn = sqlite3.connect('test1.db')
 c = conn.cursor()
 
 def getFirstStamp():
@@ -27,7 +27,30 @@ descp = input("Enter a description to describe the file: ")
 print('')
 tar = input("Enter target variable description for file: ")
 # Program will retrieve the granularity of the file
-typeGranularity = input("Granularity of the file (Monthly/Daily/Yearly): ")
+# Timestamps
+# Timestamps are not parsed (Still has DATE x x x x format)
+y, x = inputFile(filename)
+fi = x[1]
+la = x[(len(x) - 1)]
+bool = False
+
+while (bool == False):
+    typeGranularity = input("Granularity of file (Monthly/Daily/Yearly): ")
+    if (typeGranularity == 'Daily'):
+        firstStamp = datetime.strptime(fi, '%Y-%m-%d')
+        lastStamp = datetime.strptime(la, '%Y-%m-%d')
+        bool = True
+    elif(typeGranularity == 'Monthly'):
+        firstStamp = datetime.strptime(fi, '%Y-%m')
+        lastStamp = datetime.strptime(la, '%Y-%m')
+        bool = True
+    elif(typeGranularity == 'Yearly'):
+        firstStamp = datetime.strptime(fi, '%Y')
+        lastStamp = datetime.strptime(la, '%Y')
+        bool = True
+    else:
+        print("Incorrect format. Granuarity must be in 'Daily/Monthly/Yearly' format.")
+        bool = False
 
 # user will be determined by code. Set to admin
 username = 'admin'
@@ -74,20 +97,7 @@ c.execute('''INSERT INTO description(name, target, info, IDnum)
 y, x = inputFile(filename)
 fi = x[1]
 la = x[(len(x) - 1)]
-
-if (typeGranularity == 'Daily'):
-    firstStamp = datetime.strptime(fi, '%Y-%m-%d')
-    lastStamp = datetime.strptime(la, '%Y-%m-%d')
-elif(typeGranularity == 'Monthly'):
-    firstStamp = datetime.strptime(fi, '%Y-%m')
-    lastStamp = datetime.strptime(la, '%Y-%m')
-elif(typeGranularity == 'Yearly'):
-    firstStamp = datetime.strptime(fi, '%Y')
-    lastStamp = datetime.strptime(la, '%Y')
-else:
-    print("Incorrect format. Granuarity must be in 'Daily/Monthly/Yearly' format.")
-    firstStamp = 0
-    laststamp = 0
+bool = False
 
 c.execute('''INSERT INTO granularity(first, last, type, itemNum, IDnum)'''
              '''VALUES(?,?,?,?,?)''', (firstStamp, lastStamp, typeGranularity, len(x), identity))
