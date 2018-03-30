@@ -7,6 +7,8 @@ from sklearn.linear_model import LinearRegression as lr
 from sklearn.model_selection import train_test_split as tts
 from sklearn import metrics
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta as rdel
+from NarrowData import getID, getGranularityType
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,7 +21,7 @@ def percentDif(y_pred, y_test):
     y_pred, y_test = np.array(y_pred), np.array(y_test)
     return np.mean(np.abs((y_test - y_pred) / (y_test/2))) * 100
 
-def calculateTarget(corrMatrix, yValues, xValues, xTitle, yTitle, top_k):
+def calculateTarget(corrMatrix, yValues, xValues, xTitle, yTitle, granu):
     fig1 = plt.figure()
     # ----- Plot the initial line graph -----
     target = corrMatrix[0]
@@ -101,7 +103,25 @@ def calculateTarget(corrMatrix, yValues, xValues, xTitle, yTitle, top_k):
     print('Last timestamp on graph: ', stamp)
     lab = yValues[len(yValues) - 1]
     print('Last value on graph: ', lab)
-    predStamp = stamp + timedelta(days=1)
+
+    predStamp = ''
+    print(granu)
+
+    '''if (granu == 'Daily'):
+        predStamp = stamp + timedelta(days=1)
+    elif(granu == 'Monthly'):
+        predStamp = stamp + timedelta(months=1)
+    elif(granu == 'Yearly'):
+        predStamp = stamp + timedelta(years=1)
+    '''
+    if (granu == 'Daily'):
+        predStamp = stamp + timedelta(days=1)
+    elif (granu == 'Monthly'):
+        predStamp = stamp + rdel(months=1)
+    elif (granu == 'Yearly'):
+        predStamp = stamp + rdel(years=1)
+
+    print('Prediction timestamp: ', predStamp)
 
     # ----- Retrieve the values gotten from the correlation to calculate Target -----
     temp = []
