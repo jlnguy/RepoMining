@@ -9,25 +9,23 @@
 
 from NarrowData import getID, getTargetID, getTargetFirst, getGranularityType
 from ParseData import shuffleDate, shuffleY, trimData
-from ParseComma import getData, convertData
+from ParseComma import getData, convertXData, convertYData
 from Q3 import calculateTarget
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 
-def correlation(xlist, ylist):
-    xbar = np.mean(xlist)
-    ybar = np.mean(ylist)
-    xstd = np.std(xlist)
-    ystd = np.std(ylist)
+def correlation(shuffledList, targetList):
+    xbar = np.mean(shuffledList)
+    ybar = np.mean(targetList)
+    xstd = np.std(shuffledList)
+    ystd = np.std(targetList)
     num = 0.0
 
-    lenX = len(xlist) - 1
-    lenY = len(ylist) - 1
-    '''
-    print(len(xlist), len(ylist))
-    print(lenX, lenY)'''
+    lenX = len(shuffledList) - 1
+    lenY = len(targetList) - 1
+
     count = 0
     comp = 0
     if (lenX < lenY):
@@ -36,9 +34,9 @@ def correlation(xlist, ylist):
         comp = lenY
 
     while (count < comp):
-        num = num + (xlist[count] - xbar) * (ylist[count] - ybar)
+        num = num + (shuffledList[count] - xbar) * (targetList[count] - ybar)
         count = count+1
-    corr = num / ((len(xlist) - 1) * xstd * ystd)
+    corr = num / ((len(shuffledList) - 1) * xstd * ystd)
     return corr
 
 
@@ -50,8 +48,10 @@ def correlation(xlist, ylist):
 # ----------------------------------
 
 # set file as another one later.
-targetFile = 't15.csv'
+#targetFile = 't15.csv'
 # Run with t18, t7, t4, or t15
+
+targetFile = 't18.csv'
 
 # Works with t7 and t4. Date: 1/11/18
 # Works with Q2_DJIA.csv, Q2_NASDAQ.csv. Date: 2/25/18
@@ -62,6 +62,9 @@ targetID = getTargetID(targetFile)
 granularity = getGranularityType(targetID)
 targetStart = getTargetFirst(targetID)
 yStart = targetY[0]
+
+print(targetX)
+print(targetY)
 
 '''
 print('targetX: ', targetX)
@@ -99,10 +102,13 @@ axisData = [[targetFile, titleX, titleY]]
 
 # [target, id#, lag, correlation]
 # Pad the multidimensional matrix with 0's
-corrMatrix = [[0,0,0,0,0]]
+corrMatrix = [[0,0,0,0]]
+'''corrMatrix = [[0,0,0,0,0]]
+[[target, id#, lag, correlation, flag_for_negative_correlation]]'''
 
 ctr = lag
 for item in listOfNarrowDataIDs:
+    print(item)
     '''print('---------------')'''
     numberID = getTargetID(item)
     itemX, itemY, item_TitleX, item_TitleY = getData(item)
@@ -139,7 +145,8 @@ for item in listOfNarrowDataIDs:
         corr = abs(corr)
         '''print('correlation: ', corr)'''
 
-        corrMatrix = np.append(corrMatrix, [[item, numberID, ctr, corr, color]], 0)
+        #corrMatrix = np.append(corrMatrix, [[item, numberID, ctr, corr, color]], 0)
+        corrMatrix = np.append(corrMatrix, [[item, numberID, ctr, corr]], 0)
         ctr = ctr-1
     ctr = lag
 
@@ -150,7 +157,9 @@ corrMatrix = np.delete(corrMatrix, 0, 0) # Remove the padded row [0,0,0,0]
 # find the top-k variables
 
 corrSort = sorted(corrMatrix, key=lambda x: x[3], reverse=True)
-
+'''print('')
+print(corrSort)
+'''
 # ------------- Part ii ------------
 # |                                |
 # |        Find top-k values       |
@@ -161,8 +170,13 @@ ctr = 0
 inc = 0
 # topCorrValues = length of top_k, [target, id#, lag, correlation]
 # Assume top_k is 3.
+# First value is the target file; with a lag of 0, and correlation of 1.0
+#topCorrValues = [[targetFile, targetID, 0, 1.0]]
+'''topCorrValues = np.append(topCorrValues,
+                          [[corrSort[0][0], corrSort[0][1],
+                            corrSort[0][2], corrSort[0][3]]], 0)
+                            '''
 topCorrValues = [[corrSort[0][0], corrSort[0][1], corrSort[0][2], corrSort[0][3]]]
-#topCorrValue[0] is target variable
 
 while(inc < top_k):
     if (inc >= 1):
@@ -179,6 +193,10 @@ while(inc < top_k):
             inc = inc+1
     ctr = ctr+1
 
+print('')
+print('Top-k Correlation Values: ')
+print(topCorrValues)
+
 # graph the top-k variables, graph the correlation values, graph the values of top-k
 
 # graph top-k variables
@@ -191,10 +209,16 @@ print('xaxisData: ', axisData)'''
 tempString = str(axisData[0][2])
 xaxisString = [tempString]
 ctr = 1
+'''
+print('axisData:')
+print(axisData)
+print('')
+'''
 while(ctr <= top_k + 1):
-    tempString = str(axisData[ctr][2][:6])
+    tempString = str(topCorrValues[ctr-1][0][:6])
     tempString = tempString + ", lag="
     temp = str(topCorrValues[ctr-1][2])
+    '''print(str(topCorrValues[ctr-1][0]))'''
     tempString = tempString + temp
     xaxisString = np.append(xaxisString, tempString)
     ctr = ctr+1
@@ -218,6 +242,10 @@ q3Matrix = [targetY]
 # q3Matrix[0] has first values of target. Dates will be passed via function call.
 
 ctr = 1
+'''
+print('')
+print(xaxisString)
+'''
 while(ctr < len(xaxisString)):
     # Open file, retrieve X-data
     # graph x-data against target data
@@ -271,7 +299,10 @@ while(ctr < len(topCorrValues)):
 #yBarValues = yBarValues.astype(float)
 #print('yBarValues: ', yBarValues)
 
-
+'''
+print(yBarTemp)
+print(yBarValues)
+'''
 fig2 = plt.barh(yBarTemp, yBarValues)
 # Font size needs help on yticks.
 plt.title("Fig.2: Correlation value of Top-K variables")
