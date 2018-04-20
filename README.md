@@ -31,6 +31,6 @@
 | Milestone 6 (Apr 16) | [User Manual](https://jlnguy.github.io/RepoMining/seniorDesignDocs/User%20Manual.pdf), [Demo Video](https://youtu.be/SrmeL2AXkts), [Presentation](https://jlnguy.github.io/RepoMining/seniorDesignDocs/Milestone%206%20Presentation.pdf), [Progress Evaluation](https://jlnguy.github.io/RepoMining/seniorDesignDocs/Milestone%206.pdf) |
 |  |  |
 
- 
+
 
 *** 
